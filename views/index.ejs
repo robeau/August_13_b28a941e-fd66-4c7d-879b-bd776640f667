@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="/angularjs/angular.min.js"></script>
+    <script src="/jquery/dist/jquery.min.js"></script>
+    <script>
+
+      $(function(){
+
+
+      });
+
+    </script>
+  </head>
+  <body>
+  <div ng-app="myApp" ng-controller="myCtrl">
+    <section>
+      <header>
+        <h1>Add a User:</h1>
+      </header>
+      <div class="container1">
+        <form action="" name="myForm" onsubmit="return false;" novalidate>
+          <input type="text" name="name" ng-model="name" placeholder="name" required />
+          <span style="color: red" ng-show="myForm.name.$pristine">Name is required</span><br/>
+          <input type="email" name="email" ng-model="email" placeholder="email" required />
+          <span style="color: red" ng-show="myForm.email.$dirty && myForm.email.$invalid">Email is invalid</span>
+          <span style="color: red" ng-show="myForm.email.$pristine">Email is required</span><br/>
+          <input type="tel" name="tel" ng-model="tel" placeholder="tel" required />
+          <span style="color: red" ng-show="myForm.tel.$dirty && myForm.tel.$invalid">Tel is invalid</span>
+          <span style="color: red" ng-show="myForm.tel.$pristine">Tel is required</span><br/>
+          <input ng-click="addUser()" type="submit" value="Submit" ng-disabled="myForm.tel.$pristine || myForm.email.$pristine || myForm.name.$pristine || myForm.email.$dirty && myForm.email.$invalid"/>
+          <button ng-click="resetForm()" type="button">Reset</button>
+        </form>
+        <p ng-show="user_array.length <= 0">There are no users yet. Add users to enable the search feature.</p>
+      </div>
+    </section>
+    <section ng-show="user_array.length > 0">
+      <div class="container2">
+        <header>
+          <h1>Search for a user</h1>
+        </header>
+        <input type="text" placeholder="start typing" ng-model="people" />
+        <my-edit user_array="user_array">
+        <table>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Tel</th>
+          </tr>
+          <tr ng-repeat="el in user_array | filter:people" ng-class="$index">
+            <td>{{$index+1}}</td>
+            <td>{{el.name}}</td>
+            <td>{{el.email}}</td>
+            <td>{{el.tel}}</td>
+            <td><button type="button">Edit</button></td>
+            <td><button type="button" ng-click="test()">Remove</button></td>
+          </tr>
+        </table>
+        </my-edit>
+      </div>
+    </section>
+  </div>
+  <script>
+
+    var app = angular.module('myApp', []);
+
+    app.controller('myCtrl', function ($scope) {
+      $scope.user_array = [];
+      $scope.resetForm = function(){
+        console.log('resetting form... ');
+        var form = document.forms.myForm;
+        form.name.value = '';
+        form.email.value = '';
+        form.tel.value = '';
+      };
+      $scope.test = function () {
+        console.log($scope.user_array.length);
+      };
+      $scope.addUser = function () {
+        console.log('adding user ... ');
+        var form = document.forms.myForm;
+        var person = {
+          name: form.name.value,
+          email: form.email.value,
+          tel: form.tel.value
+        }
+        $scope.user_array.push(person);
+      };
+    });
+
+
+    app.directive('myEdit', function () {
+
+      return{
+        scope: true,
+        link:function (scope, element, attrs){
+
+          //element[0].querySelector('.edit').bind('click', function () {
+          //element[0].querySelector('.edit').text('Save');
+          //});
+          scope.$watch('user_array.length', function () {
+            if (scope.user_array.length > 0){
+              var myTarget = 1;
+              var myRow = element[0].children[0].children[0].children[myTarget];
+              var thisName = myRow.children[1];
+              var thisEmail = myRow.children[2];
+              var thisTel = myRow.children[3];
+              var editButton = myRow.children[4].children[0];
+              var removeButton = myRow.children[5].children[0];
+              editButton.addEventListener('click', function () {
+                $(thisName).attr('contentEditable', true).addClass('editable');
+                $(thisEmail).attr('contentEditable', true).addClass('editable');
+                $(thisTel).attr('contentEditable', true).addClass('editable');
+                $(this).html('Save');
+
+                this.removeEventListener('click');
+                this.addEventListener('click', function(){
+                  $(thisName).attr('contentEditable', false).removeClass('editable');
+                  $(thisEmail).attr('contentEditable', false).removeClass('editable');
+                  $(thisTel).attr('contentEditable', false).removeClass('editable');
+                });
+              })
+              removeButton.addEventListener('click', function () {
+                  scope.user_array.pop();
+                  $(myRow).remove();
+              });
+            }
+          });
+
+
+        }
+      };
+    });
+  </script>
+  </body>
+</html>
