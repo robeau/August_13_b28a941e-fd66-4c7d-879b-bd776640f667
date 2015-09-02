@@ -42,7 +42,7 @@
           <h1>Search for a user</h1>
         </header>
         <input type="text" placeholder="start typing" ng-model="people" />
-        <my-edit user_array="user_array">
+        <contact user_array="user_array">
         <table>
           <tr>
             <th>ID</th>
@@ -52,14 +52,15 @@
           </tr>
           <tr ng-repeat="el in user_array | filter:people" ng-class="$index">
             <td>{{$index+1}}</td>
-            <td>{{el.name}}</td>
-            <td>{{el.email}}</td>
-            <td>{{el.tel}}</td>
-            <td><button type="button">Edit</button></td>
-            <td><button type="button" ng-click="test()">Remove</button></td>
+            <td><span ng-hide="edit">{{el.name}}</span><input type="text" ng-model="el.name" ng-show="edit" /></td>
+            <td><span ng-hide="edit">{{el.email}}</span><input type="text" ng-model="el.email" ng-show="edit" /></td>
+            <td><span ng-hide="edit">{{el.tel}}</span><input type="text" ng-model="el.tel" ng-show="edit" /></td>
+            <td ng-hide="edit"><button ng-click="edit = !edit" type="button">Edit</button></td>
+            <td ng-show="edit"><button ng-click="edit = !edit; save();" type="button">Save</button></td>
+            <td><button type="button" ng-click="delete()">Remove</button></td>
           </tr>
         </table>
-        </my-edit>
+        </contact>
       </div>
     </section>
   </div>
@@ -67,8 +68,14 @@
 
     var app = angular.module('myApp', []);
 
-    app.controller('myCtrl', function ($scope) {
+    app.service('Contact', function () {
+      
+    })
+    app.controller('myCtrl', function ($scope, Contact) {
       $scope.user_array = [];
+      $scope.save = function (contact) {
+        Contact.save(contact);
+      }
       $scope.resetForm = function(){
         console.log('resetting form... ');
         var form = document.forms.myForm;
@@ -76,8 +83,8 @@
         form.email.value = '';
         form.tel.value = '';
       };
-      $scope.test = function () {
-        console.log($scope.user_array.length);
+      $scope.delete = function () {
+        $scope.user_array.pop();
       };
       $scope.addUser = function () {
         console.log('adding user ... ');
@@ -92,15 +99,18 @@
     });
 
 
-    app.directive('myEdit', function () {
-
+    app.directive('contact', function () {
       return{
-        scope: true,
+        scope: {
+          user_array : '=user_array'
+        },
         link:function (scope, element, attrs){
 
-          //element[0].querySelector('.edit').bind('click', function () {
-          //element[0].querySelector('.edit').text('Save');
-          //});
+          scope.edit = false;
+          scope.save = function(){
+            console.log('hello from contact',scope.user_array[0].name);
+          }
+          /*
           scope.$watch('user_array.length', function () {
             if (scope.user_array.length > 0){
               var myTarget = 1;
@@ -129,6 +139,7 @@
               });
             }
           });
+          */
 
 
         }
